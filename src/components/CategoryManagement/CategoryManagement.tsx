@@ -19,25 +19,22 @@ import { RootState } from "../../app/store.ts";
 import { useAppDispatch } from "../../app/hooks.ts";
 import {
   createNewCategory,
-  deleteCategory,
-  editCategory,
   fetchAllCategories,
-  fetchOneCategory,
-} from "../../store/thunks/financeThunk.ts";
-
-const initialState = {
-  id: "",
-  name: "",
-  type: "",
-};
+  editCategory,
+  deleteCategory
+} from '../../store/thunks/financeThunk.ts';
 
 const CategoryManagement = () => {
   const dispatch = useAppDispatch();
-  const { categories, isFetchingAllCategories, categoryToEdit, isFetchingOneCategory } = useSelector(
+  const { categories, isFetchingAllCategories } = useSelector(
     (state: RootState) => state.finance
   );
 
-  const [formState, setFormState] = useState<ICategoryFromDB>(initialState);
+  const [formState, setFormState] = useState<ICategoryFromDB>({
+    id: "",
+    name: "",
+    type: "",
+  });
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -45,33 +42,31 @@ const CategoryManagement = () => {
     dispatch(fetchAllCategories());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (categoryToEdit) {
-      setFormState(categoryToEdit);
-    }
-  }, [categoryToEdit]);
-
   const handleOpenDialog = () => {
     setIsEditing(false);
-    setFormState(initialState);
+    setFormState({ id: "", name: "", type: "" });
     setOpenDialog(true);
   };
 
   const handleEditCategory = (categoryId: string) => {
-    dispatch(fetchOneCategory(categoryId));
-    setIsEditing(true);
-    setOpenDialog(true);
+    const category = categories.find((cat) => cat.id === categoryId);
+    if (category) {
+      setIsEditing(true);
+      setFormState(category);
+      setOpenDialog(true);
+    }
+  };
+
+  const handleDeleteCategory =  (categoryId: string) => {
+    dispatch(deleteCategory(categoryId));
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setFormState(initialState);
   };
 
   const handleFormChange = (
-    event:
-      | SelectChangeEvent
-      | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
     setFormState((prevState) => ({
@@ -86,11 +81,10 @@ const CategoryManagement = () => {
     } else {
       dispatch(createNewCategory(formState));
     }
-    setFormState(initialState);
     setOpenDialog(false);
   };
 
-  if (isFetchingAllCategories || isFetchingOneCategory) return <CircularProgress />;
+  if (isFetchingAllCategories) return <CircularProgress />;
 
   return (
     <div>
@@ -108,7 +102,7 @@ const CategoryManagement = () => {
               <Button variant="outlined" onClick={() => handleEditCategory(category.id)}>
                 Edit
               </Button>
-              <Button variant="outlined" color="error" onClick={() => dispatch(deleteCategory(category.id))}>
+              <Button variant="outlined" color="error" onClick={() => handleDeleteCategory(category.id)}>
                 Delete
               </Button>
             </li>

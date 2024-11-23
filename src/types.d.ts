@@ -8,8 +8,12 @@ export interface ICategoryFromDB extends ICategory {
 }
 
 export interface Transaction {
-  id: string;
   amount: number;
   date: string;
   categoryId: string;
+  type: string;
+}
+
+export interface TransactionFromDB extends Transaction {
+  id: string;
 }

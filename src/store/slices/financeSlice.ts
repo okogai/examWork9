@@ -1,14 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { createNewCategory, fetchAllCategories, fetchOneCategory } from '../thunks/financeThunk.ts';
-import { ICategoryFromDB, Transaction } from '../../types';
+import {
+  createNewCategory, createNewTransaction,
+  fetchAllCategories,
+  fetchAllTransactions,
+  fetchOneCategory, fetchOneTransaction
+} from '../thunks/financeThunk.ts';
+import { ICategoryFromDB, TransactionFromDB } from '../../types';
 
 interface FinanceState {
-  transactions: Transaction[];
+  transactions: TransactionFromDB[];
   categories: ICategoryFromDB[];
   categoryToEdit: ICategoryFromDB | null;
+  transactionToEdit: TransactionFromDB | null;
   isFetchingAllCategories: boolean;
+  isFetchingAllTransactions: boolean;
   isFetchingOneCategory: boolean;
+  isFetchingOneTransaction: boolean;
   isAddingNewCategory: boolean;
+  isAddingNewTransaction: boolean;
   error: boolean;
 }
 
@@ -16,9 +25,13 @@ const initialState: FinanceState = {
   transactions: [],
   categories: [],
   categoryToEdit: null,
+  transactionToEdit: null,
   isFetchingAllCategories: false,
+  isFetchingAllTransactions: false,
   isFetchingOneCategory: false,
+  isFetchingOneTransaction: false,
   isAddingNewCategory: false,
+  isAddingNewTransaction: false,
   error: false,
 };
 
@@ -67,7 +80,46 @@ export const financeSlice = createSlice({
       .addCase(fetchOneCategory.rejected, (state) => {
         state.isFetchingOneCategory = false;
         state.error = true;
-      });
+      })
+      .addCase(fetchAllTransactions.pending, (state) => {
+      state.isFetchingAllTransactions = true;
+      state.error = false;
+      })
+      .addCase(fetchAllTransactions.fulfilled, (state, action: PayloadAction<TransactionFromDB[]>) => {
+          state.isFetchingAllTransactions = false;
+          state.transactions = action.payload;
+        },
+      )
+      .addCase(fetchAllTransactions.rejected, (state) => {
+        state.isFetchingAllTransactions = false;
+        state.error = true;
+      })
+      .addCase(fetchOneTransaction.pending, (state) => {
+        state.isFetchingOneTransaction = true;
+        state.error = false;
+      })
+      .addCase(fetchOneTransaction.fulfilled,(state, action: PayloadAction<TransactionFromDB>) => {
+          state.isFetchingOneTransaction = false;
+          state.transactionToEdit = action.payload;
+        },
+      )
+      .addCase(fetchOneTransaction.rejected, (state) => {
+        state.isFetchingOneTransaction = false;
+        state.error = true;
+      })
+      .addCase(createNewTransaction.pending, (state) => {
+        state.isAddingNewTransaction = true;
+        state.error = false;
+      })
+      .addCase(createNewTransaction.fulfilled,(state) => {
+          state.isAddingNewTransaction = false;
+        },
+      )
+      .addCase(createNewTransaction.rejected, (state) => {
+        state.isAddingNewTransaction = false;
+        state.error = true;
+      })
+    ;
   },
 });
 
