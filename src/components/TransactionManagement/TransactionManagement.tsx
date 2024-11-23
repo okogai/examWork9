@@ -12,13 +12,14 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
-  CardContent, Typography,
-  Card
+  CardContent,
+  Typography,
+  Card,
 } from '@mui/material';
 import { TransactionFromDB } from "../../types";
 import { useAppDispatch } from "../../app/hooks.ts";
 import { useSelector } from "react-redux";
-import { createNewTransaction, editTransaction, fetchAllCategories, fetchAllTransactions, fetchOneTransaction, deleteTransaction } from "../../store/thunks/financeThunk.ts";
+import { createNewTransaction, editTransaction, fetchAllCategories, fetchAllTransactions, deleteTransaction } from "../../store/thunks/financeThunk.ts";
 import { RootState } from "../../app/store.ts";
 
 const initialState: TransactionFromDB = {
@@ -58,9 +59,12 @@ const TransactionManagement = () => {
   };
 
   const handleEditTransaction = (transactionId: string) => {
-    dispatch(fetchOneTransaction(transactionId));
-    setIsEditing(true);
-    setOpenDialog(true);
+    const transaction = transactions.find((cat) => cat.id === transactionId);
+    if (transaction) {
+      setIsEditing(true);
+      setFormState(transaction);
+      setOpenDialog(true);
+    }
   };
 
   const handleDeleteTransaction = (transactionId: string) => {
@@ -81,12 +85,28 @@ const TransactionManagement = () => {
     setFormState(prev => ({ ...prev, type: value, categoryId: '' }));
   };
 
+  const validateForm = () => {
+    if (!formState.type) {
+      alert("Please select a transaction type.");
+      return false;
+    }
+    if (!formState.categoryId) {
+      alert("Please select a category.");
+      return false;
+    }
+    if (formState.amount <= 0) {
+      alert("Amount must be greater than 0.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(transactionToEdit);
-    if (transactionToEdit) {
+    if (!validateForm()) return;
+
+    if (isEditing) {
       await dispatch(editTransaction(formState));
-      console.log(formState);
     } else {
       await dispatch(createNewTransaction(formState));
     }
@@ -94,12 +114,21 @@ const TransactionManagement = () => {
     setOpenDialog(false);
   };
 
+  const total = transactions.reduce((sum, transaction) => {
+    return transaction.type === "income"
+      ? sum + Number(transaction.amount)
+      : sum - Number(transaction.amount);
+  }, 0);
+
   if (isFetchingAllCategories || isFetchingAllTransactions || isFetchingOneTransaction) return <CircularProgress />;
 
   const filteredCategories = categories.filter(category => category.type === formState.type);
 
   return (
     <div style={{ padding: "20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Typography variant="h5" style={{ marginBottom: "20px" }}>
+        Total: {total < 0 ? `${total}` : `${total}`} KGS
+      </Typography>
       <Button variant="contained" color="primary" onClick={handleOpenDialog} sx={{ marginBottom: 2 }}>
         Add Transaction
       </Button>
@@ -120,8 +149,9 @@ const TransactionManagement = () => {
             }}
           >
             <CardContent>
-              <Typography variant="h6" align="center">{transaction.amount} - {transaction.type}</Typography>
-              <Typography variant="body2" color="textSecondary" align="center">
+              <Typography variant="h5" align="center">{transaction.amount} KGS</Typography>
+              <Typography variant="h6" align="center">{transaction.type}</Typography>
+              <Typography variant="h6" color="textSecondary" align="center">
                 Category: {categories.find(cat => cat.id === transaction.categoryId)?.name || "Unknown"}
               </Typography>
             </CardContent>
@@ -192,4 +222,3 @@ const TransactionManagement = () => {
 };
 
 export default TransactionManagement;
-

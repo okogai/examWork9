@@ -24,12 +24,12 @@ import {
   createNewCategory,
   fetchAllCategories,
   editCategory,
-  deleteCategory
+  deleteCategory, deleteTransaction
 } from '../../store/thunks/financeThunk.ts';
 
 const CategoryManagement = () => {
   const dispatch = useAppDispatch();
-  const { categories, isFetchingAllCategories } = useSelector(
+  const { transactions, categories, isFetchingAllCategories, isFetchingOneCategory, isAddingNewCategory} = useSelector(
     (state: RootState) => state.finance
   );
 
@@ -60,7 +60,14 @@ const CategoryManagement = () => {
     }
   };
 
-  const handleDeleteCategory =  (categoryId: string) => {
+  const handleDeleteCategory = async (categoryId: string) => {
+    const relatedTransactions = transactions.filter(transaction => transaction.categoryId === categoryId);
+
+    const deletePromises = relatedTransactions.map(transaction =>
+      dispatch(deleteTransaction(transaction.id))
+    );
+
+    await Promise.all(deletePromises);
     dispatch(deleteCategory(categoryId));
   };
 
@@ -81,6 +88,16 @@ const CategoryManagement = () => {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formState.name.trim()) {
+      alert("Please enter a category name.");
+      return;
+    }
+
+    if (!formState.type.trim()) {
+      alert("Please select a category type.");
+      return;
+    }
+
     if (isEditing) {
       dispatch(editCategory(formState));
     } else {
@@ -89,7 +106,20 @@ const CategoryManagement = () => {
     setOpenDialog(false);
   };
 
-  if (isFetchingAllCategories) return <CircularProgress />;
+  if (isFetchingAllCategories || isFetchingOneCategory || isAddingNewCategory) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "20px", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
@@ -98,35 +128,41 @@ const CategoryManagement = () => {
       </Button>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
-        {categories && categories.map((category) => (
-          <Card
-            key={category.id}
-            sx={{
-              maxWidth: 345,
-              boxShadow: 3,
-              borderRadius: 2,
-              padding: 2,
-              marginBottom: 2,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <CardContent>
-              <Typography variant="h6" align="center">{category.name}</Typography>
-              <Typography variant="body2" color="textSecondary" align="center">{category.type}</Typography>
-            </CardContent>
-            <DialogActions style={{ justifyContent: "center" }}>
-              <Button variant="contained" color="primary" onClick={() => handleEditCategory(category.id)}>
-                Edit
-              </Button>
-              <Button variant="contained" color="warning" onClick={() => handleDeleteCategory(category.id)}>
-                Delete
-              </Button>
-            </DialogActions>
-          </Card>
-        ))}
+        {categories && categories.length > 0 ? (
+          categories.map((category) => (
+            <Card
+              key={category.id}
+              sx={{
+                maxWidth: 345,
+                boxShadow: 3,
+                borderRadius: 2,
+                padding: 2,
+                marginBottom: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <CardContent>
+                <Typography variant="h6" align="center">{category.name}</Typography>
+                <Typography variant="body2" color="textSecondary" align="center">{category.type}</Typography>
+              </CardContent>
+              <DialogActions style={{ justifyContent: "center" }}>
+                <Button variant="contained" color="primary" onClick={() => handleEditCategory(category.id)}>
+                  Edit
+                </Button>
+                <Button variant="contained" color="warning" onClick={() => handleDeleteCategory(category.id)}>
+                  Delete
+                </Button>
+              </DialogActions>
+            </Card>
+          ))
+        ) : (
+          <Typography variant="h6" color="textSecondary" align="center" style={{ marginTop: "20px" }}>
+            No categories have been added yet.
+          </Typography>
+        )}
       </div>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
