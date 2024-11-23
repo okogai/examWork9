@@ -1,8 +1,7 @@
-import { AppBar, Box, Button, Toolbar, Typography } from '@mui/material';
-import { NavLink } from 'react-router-dom';
+import { AppBar, Box, Button, Toolbar, Typography } from "@mui/material";
+import { NavLink } from "react-router-dom";
 
 const NavBar = () => {
-
   return (
     <Box sx={{ flexGrow: 1, mb: 5 }}>
       <AppBar position="static">
@@ -12,11 +11,11 @@ const NavBar = () => {
             color="inherit"
             component={NavLink}
             to="/"
-            sx={{ textDecoration: 'none' }}
+            sx={{ textDecoration: "none" }}
           >
             Finance tracker
           </Typography>
-          <Box sx={{ ml: 'auto', display: 'flex' }}>
+          <Box sx={{ ml: "auto", display: "flex" }}>
             <Button
               color="inherit"
               variant="text"

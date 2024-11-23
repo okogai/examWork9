@@ -1,11 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
-  createNewCategory, createNewTransaction,
+  createNewCategory,
+  createNewTransaction,
   fetchAllCategories,
   fetchAllTransactions,
-  fetchOneCategory, fetchOneTransaction
-} from '../thunks/financeThunk.ts';
-import { ICategoryFromDB, TransactionFromDB } from '../../types';
+  fetchOneCategory,
+  fetchOneTransaction,
+} from "../thunks/financeThunk.ts";
+import { ICategoryFromDB, TransactionFromDB } from "../../types";
 
 interface FinanceState {
   transactions: TransactionFromDB[];
@@ -45,7 +47,8 @@ export const financeSlice = createSlice({
         state.isFetchingAllCategories = true;
         state.error = false;
       })
-      .addCase(fetchAllCategories.fulfilled,
+      .addCase(
+        fetchAllCategories.fulfilled,
         (state, action: PayloadAction<ICategoryFromDB[]>) => {
           state.isFetchingAllCategories = false;
           state.categories = action.payload;
@@ -56,13 +59,12 @@ export const financeSlice = createSlice({
         state.error = true;
       })
       .addCase(createNewCategory.pending, (state) => {
-      state.isAddingNewCategory = true;
-      state.error = false;
+        state.isAddingNewCategory = true;
+        state.error = false;
       })
       .addCase(createNewCategory.fulfilled, (state) => {
-          state.isAddingNewCategory = false;
-        },
-        )
+        state.isAddingNewCategory = false;
+      })
       .addCase(createNewCategory.rejected, (state) => {
         state.isAddingNewCategory = false;
         state.error = true;
@@ -71,7 +73,8 @@ export const financeSlice = createSlice({
         state.isFetchingOneCategory = true;
         state.error = false;
       })
-      .addCase(fetchOneCategory.fulfilled,
+      .addCase(
+        fetchOneCategory.fulfilled,
         (state, action: PayloadAction<ICategoryFromDB>) => {
           state.isFetchingOneCategory = false;
           state.categoryToEdit = action.payload;
@@ -82,10 +85,12 @@ export const financeSlice = createSlice({
         state.error = true;
       })
       .addCase(fetchAllTransactions.pending, (state) => {
-      state.isFetchingAllTransactions = true;
-      state.error = false;
+        state.isFetchingAllTransactions = true;
+        state.error = false;
       })
-      .addCase(fetchAllTransactions.fulfilled, (state, action: PayloadAction<TransactionFromDB[]>) => {
+      .addCase(
+        fetchAllTransactions.fulfilled,
+        (state, action: PayloadAction<TransactionFromDB[]>) => {
           state.isFetchingAllTransactions = false;
           state.transactions = action.payload;
         },
@@ -98,7 +103,9 @@ export const financeSlice = createSlice({
         state.isFetchingOneTransaction = true;
         state.error = false;
       })
-      .addCase(fetchOneTransaction.fulfilled,(state, action: PayloadAction<TransactionFromDB>) => {
+      .addCase(
+        fetchOneTransaction.fulfilled,
+        (state, action: PayloadAction<TransactionFromDB>) => {
           state.isFetchingOneTransaction = false;
           state.transactionToEdit = action.payload;
         },
@@ -111,15 +118,13 @@ export const financeSlice = createSlice({
         state.isAddingNewTransaction = true;
         state.error = false;
       })
-      .addCase(createNewTransaction.fulfilled,(state) => {
-          state.isAddingNewTransaction = false;
-        },
-      )
+      .addCase(createNewTransaction.fulfilled, (state) => {
+        state.isAddingNewTransaction = false;
+      })
       .addCase(createNewTransaction.rejected, (state) => {
         state.isAddingNewTransaction = false;
         state.error = true;
-      })
-    ;
+      });
   },
 });
 

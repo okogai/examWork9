@@ -16,22 +16,27 @@ import {
   CardContent,
   Typography,
   Card,
-} from '@mui/material';
-import { ICategoryFromDB } from '../../types';
+} from "@mui/material";
+import { ICategoryFromDB } from "../../types";
 import { RootState } from "../../app/store.ts";
 import { useAppDispatch } from "../../app/hooks.ts";
 import {
   createNewCategory,
   fetchAllCategories,
   editCategory,
-  deleteCategory, deleteTransaction
-} from '../../store/thunks/financeThunk.ts';
+  deleteCategory,
+  deleteTransaction,
+} from "../../store/thunks/financeThunk.ts";
 
 const CategoryManagement = () => {
   const dispatch = useAppDispatch();
-  const { transactions, categories, isFetchingAllCategories, isFetchingOneCategory, isAddingNewCategory} = useSelector(
-    (state: RootState) => state.finance
-  );
+  const {
+    transactions,
+    categories,
+    isFetchingAllCategories,
+    isFetchingOneCategory,
+    isAddingNewCategory,
+  } = useSelector((state: RootState) => state.finance);
 
   const [formState, setFormState] = useState<ICategoryFromDB>({
     id: "",
@@ -61,10 +66,12 @@ const CategoryManagement = () => {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    const relatedTransactions = transactions.filter(transaction => transaction.categoryId === categoryId);
+    const relatedTransactions = transactions.filter(
+      (transaction) => transaction.categoryId === categoryId,
+    );
 
-    const deletePromises = relatedTransactions.map(transaction =>
-      dispatch(deleteTransaction(transaction.id))
+    const deletePromises = relatedTransactions.map((transaction) =>
+      dispatch(deleteTransaction(transaction.id)),
     );
 
     await Promise.all(deletePromises);
@@ -76,7 +83,9 @@ const CategoryManagement = () => {
   };
 
   const handleFormChange = (
-    event: SelectChangeEvent | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    event:
+      | SelectChangeEvent
+      | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = event.target;
     setFormState((prevState) => ({
@@ -122,12 +131,32 @@ const CategoryManagement = () => {
   }
 
   return (
-    <div style={{ padding: "20px", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-      <Button variant="contained" color="primary" onClick={handleOpenDialog} sx={{ marginBottom: 2 }}>
+    <div
+      style={{
+        padding: "20px",
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleOpenDialog}
+        sx={{ marginBottom: 2 }}
+      >
         Add Category
       </Button>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "20px",
+          justifyContent: "center",
+        }}
+      >
         {categories && categories.length > 0 ? (
           categories.map((category) => (
             <Card
@@ -145,28 +174,51 @@ const CategoryManagement = () => {
               }}
             >
               <CardContent>
-                <Typography variant="h6" align="center">{category.name}</Typography>
-                <Typography variant="body2" color="textSecondary" align="center">{category.type}</Typography>
+                <Typography variant="h6" align="center">
+                  {category.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  align="center"
+                >
+                  {category.type}
+                </Typography>
               </CardContent>
               <DialogActions style={{ justifyContent: "center" }}>
-                <Button variant="contained" color="primary" onClick={() => handleEditCategory(category.id)}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleEditCategory(category.id)}
+                >
                   Edit
                 </Button>
-                <Button variant="contained" color="warning" onClick={() => handleDeleteCategory(category.id)}>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  onClick={() => handleDeleteCategory(category.id)}
+                >
                   Delete
                 </Button>
               </DialogActions>
             </Card>
           ))
         ) : (
-          <Typography variant="h6" color="textSecondary" align="center" style={{ marginTop: "20px" }}>
-            No categories have been added yet.
+          <Typography
+            variant="h6"
+            color="textSecondary"
+            align="center"
+            style={{ marginTop: "20px" }}
+          >
+            No categories available yet.
           </Typography>
         )}
       </div>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>{isEditing ? "Edit Category" : "Add Category"}</DialogTitle>
+        <DialogTitle>
+          {isEditing ? "Edit Category" : "Add Category"}
+        </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSave}>
             <TextField
