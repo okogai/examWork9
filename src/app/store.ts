@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { tvShowsReducer } from '../store/slices/financeSlice.ts';
+import { financeReducer } from "../store/slices/financeSlice.ts";
 
 export const store = configureStore({
   reducer: {
-    tvShows: tvShowsReducer,
+    finance: financeReducer,
   },
 });
 

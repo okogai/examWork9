@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosAPI = axios.create({
-  baseURL: "http://api.tvmaze.com/",
+  baseURL: "https://okogaidb-default-rtdb.europe-west1.firebasedatabase.app/",
 });
 
 export default axiosAPI;
