@@ -1,4 +1,4 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { useSelector } from "react-redux";
 import {
   Button,
@@ -13,7 +13,10 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
-} from "@mui/material";
+  CardContent,
+  Typography,
+  Card,
+} from '@mui/material';
 import { ICategoryFromDB } from '../../types';
 import { RootState } from "../../app/store.ts";
 import { useAppDispatch } from "../../app/hooks.ts";
@@ -75,7 +78,9 @@ const CategoryManagement = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (isEditing) {
       dispatch(editCategory(formState));
     } else {
@@ -87,60 +92,76 @@ const CategoryManagement = () => {
   if (isFetchingAllCategories) return <CircularProgress />;
 
   return (
-    <div>
-      <Button variant="contained" color="primary" onClick={handleOpenDialog}>
+    <div style={{ padding: "20px", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+      <Button variant="contained" color="primary" onClick={handleOpenDialog} sx={{ marginBottom: 2 }}>
         Add Category
       </Button>
 
-      {categories && (
-        <ul>
-          {categories.map((category) => (
-            <li key={category.id}>
-              <span>
-                {category.name} ({category.type})
-              </span>
-              <Button variant="outlined" onClick={() => handleEditCategory(category.id)}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
+        {categories && categories.map((category) => (
+          <Card
+            key={category.id}
+            sx={{
+              maxWidth: 345,
+              boxShadow: 3,
+              borderRadius: 2,
+              padding: 2,
+              marginBottom: 2,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <CardContent>
+              <Typography variant="h6" align="center">{category.name}</Typography>
+              <Typography variant="body2" color="textSecondary" align="center">{category.type}</Typography>
+            </CardContent>
+            <DialogActions style={{ justifyContent: "center" }}>
+              <Button variant="contained" color="primary" onClick={() => handleEditCategory(category.id)}>
                 Edit
               </Button>
-              <Button variant="outlined" color="error" onClick={() => handleDeleteCategory(category.id)}>
+              <Button variant="contained" color="warning" onClick={() => handleDeleteCategory(category.id)}>
                 Delete
               </Button>
-            </li>
-          ))}
-        </ul>
-      )}
+            </DialogActions>
+          </Card>
+        ))}
+      </div>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>{isEditing ? "Edit Category" : "Add Category"}</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Category Name"
-            fullWidth
-            value={formState.name}
-            onChange={handleFormChange}
-            name="name"
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Type</InputLabel>
-            <Select
-              variant="outlined"
-              value={formState.type}
+          <form onSubmit={handleSave}>
+            <TextField
+              label="Category Name"
+              fullWidth
+              value={formState.name}
               onChange={handleFormChange}
-              name="type"
-            >
-              <MenuItem value="income">Income</MenuItem>
-              <MenuItem value="expense">Expense</MenuItem>
-            </Select>
-          </FormControl>
+              name="name"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Type</InputLabel>
+              <Select
+                variant="outlined"
+                value={formState.type}
+                onChange={handleFormChange}
+                name="type"
+              >
+                <MenuItem value="income">Income</MenuItem>
+                <MenuItem value="expense">Expense</MenuItem>
+              </Select>
+            </FormControl>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancel
+              </Button>
+              <Button color="primary" type="submit">
+                {isEditing ? "Save Changes" : "Save"}
+              </Button>
+            </DialogActions>
+          </form>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button color="primary" onClick={handleSave}>
-            {isEditing ? "Save Changes" : "Save"}
-          </Button>
-        </DialogActions>
       </Dialog>
     </div>
   );

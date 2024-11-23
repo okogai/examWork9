@@ -11,8 +11,8 @@ export const fetchAllCategories = createAsyncThunk<ICategoryFromDB[], void>(
     if (response.data) {
       const categoriesArray: ICategoryFromDB[] = Object.keys(response.data).map(
         (key) => ({
-          id: key,
           ...response.data[key],
+          id: key
         })
       );
       return categoriesArray;
@@ -41,7 +41,7 @@ export const deleteCategory = createAsyncThunk<void, string>(
 export const editCategory = createAsyncThunk<void, ICategoryFromDB>(
   "finances/editCategory",
   async (category: ICategoryFromDB, thunkAPI) => {
-    await axiosAPI.put(`finance-categories/${category.id}.json`, {name: category.name, type: category.type});
+    await axiosAPI.put(`finance-categories/${category.id}.json`, category);
     thunkAPI.dispatch(fetchAllCategories());
   }
 );
@@ -78,11 +78,12 @@ export const fetchAllTransactions = createAsyncThunk<TransactionFromDB[], void>(
 
 export const fetchOneTransaction = createAsyncThunk<TransactionFromDB, string>(
   "finances/fetchOneTransaction",
-  async (id: string) => {
+  async (id: string, thunkAPI) => {
     const response = await axiosAPI(`finance-transactions/${id}.json`);
     if (response.data) {
       return { id, ...response.data };
     }
+    thunkAPI.dispatch(fetchAllTransactions());
   }
 );
 
@@ -90,7 +91,7 @@ export const createNewTransaction = createAsyncThunk<void, Transaction>(
   "finances/createNewTransaction",
   async (transaction: Transaction, thunkAPI) => {
     await axiosAPI.post('finance-transactions.json', transaction);
-    thunkAPI.dispatch(fetchAllCategories());
+    thunkAPI.dispatch(fetchAllTransactions());
   }
 );
 
@@ -98,7 +99,7 @@ export const deleteTransaction = createAsyncThunk<void, string>(
   "finances/deleteTransaction",
   async (id: string, thunkAPI) => {
     await axiosAPI.delete(`finance-transactions/${id}.json`);
-    thunkAPI.dispatch(fetchAllCategories());
+    thunkAPI.dispatch(fetchAllTransactions());
   }
 );
 
@@ -106,7 +107,7 @@ export const editTransaction = createAsyncThunk<void, TransactionFromDB>(
   "finances/editTransaction",
   async (transaction: TransactionFromDB, thunkAPI) => {
     await axiosAPI.put(`finance-transactions/${transaction.id}.json`, transaction);
-    thunkAPI.dispatch(fetchAllCategories());
+    thunkAPI.dispatch(fetchAllTransactions());
   }
 );
 
